@@ -1,0 +1,16 @@
+[project]
+name = "banner_cds_packager"
+description = "A CLI program to build a package which can be deployed via Banner CDS. Files chosen are those changed in a range of commits."
+readme = "README.md"
+license = "GPL-3.0-or-later"
+authors = [
+  {name = "Adam Franco", email = "afranco@middlebury.edu"}
+]
+dynamic = ["version"]
+dependencies = [
+  "typer",
+  "typing_extensions"
+]
+
+[project.scripts]
+create_banner_cds_package = "banner_cds_packager.cli:app"
