@@ -1,5 +1,6 @@
 import typer
 from pathlib import Path
+import subprocess
 from typing_extensions import Annotated
 
 
@@ -30,3 +31,17 @@ def create_banner_cds_package(
 
     package_dir = temp_dir / f"deploy-{base}_{head}"
     print(f"Packaging into {str(package_dir)} ...")
+
+    changed_files = run_git_command(['git', 'diff', '--name-only', '--diff-filter=d', f"{base}..{head}"]).splitlines()
+    print(changed_files)
+
+
+def run_git_command(command):
+    try:
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            raise Exception(f'Git command failed with the following error:\n{stderr.decode()}')
+        return stdout.decode().strip()
+    except Exception as e:
+        print(e)
