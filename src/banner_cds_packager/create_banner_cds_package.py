@@ -27,5 +27,6 @@ def create_banner_cds_package(
     # Cron
     cron_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match cron file patterns. Can be specified multiple times.")] = ["crontab/*.txt"]
 ):
-    package_dirname = f"deploy-{base}_{head}"
-    print(f"Packaging into {package_dirname}")
+
+    package_dir = temp_dir / f"deploy-{base}_{head}"
+    print(f"Packaging into {str(package_dir)} ...")
