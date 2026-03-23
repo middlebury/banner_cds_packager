@@ -63,8 +63,7 @@ def create_banner_cds_package(
 
     if instructions:
         package.add_file("\n".join(instructions) + "\n", "inst.txt")
-        result_path = package.save()
-        print(f"Packaged into {str(result_path)}")
+        print(f"Packaged into {str(package.get_path())}")
     else:
         package.delete()
         print("No changes to package")

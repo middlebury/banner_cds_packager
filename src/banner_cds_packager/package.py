@@ -12,8 +12,8 @@ class Package:
         """Add file content to a file path in this package."""
         pass
 
-    def save(self) -> Path:
-        """Write any remaining output and return the resulting path."""
+    def get_path(self) -> Path:
+        """Answer the package path."""
         pass
 
     def delete(self) -> None:
@@ -38,8 +38,8 @@ class DirectoryPackage(Package):
         destination_path.parent.mkdir(parents=True, exist_ok=True)
         destination_path.write_text(content)
 
-    def save(self) -> Path:
-        """Write any remaining output and return the resulting path."""
+    def get_path(self) -> Path:
+        """Answer the package path."""
         return self.output_directory
 
     def delete(self) -> None:
@@ -64,8 +64,8 @@ class ZipPackage(Package):
         """Add file content to a file path in this package."""
         self.zipfile.writestr(destination, content)
 
-    def save(self) -> Path:
-        """Write any remaining output and return the resulting path."""
+    def get_path(self) -> Path:
+        """Answer the package path."""
         return self.output_file
 
     def delete(self) -> None:
