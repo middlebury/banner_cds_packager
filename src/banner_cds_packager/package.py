@@ -8,7 +8,7 @@ class Package:
         """Copy a file's content into this package."""
         pass
 
-    def add_file(self, content: str, destination: Path) -> None:
+    def create_file(self, content: str, destination: Path) -> None:
         """Add file content to a file path in this package."""
         pass
 
@@ -32,7 +32,7 @@ class DirectoryPackage(Package):
         destination_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(source, destination_path)
 
-    def add_file(self, content: str, destination: Path) -> None:
+    def create_file(self, content: str, destination: Path) -> None:
         """Add file content to a file path in this package."""
         destination_path = self.output_directory / destination
         destination_path.parent.mkdir(parents=True, exist_ok=True)
@@ -60,7 +60,7 @@ class ZipPackage(Package):
         """Copy a file's content into this package."""
         self.zipfile.write(source, destination)
 
-    def add_file(self, content: str, destination: Path) -> None:
+    def create_file(self, content: str, destination: Path) -> None:
         """Add file content to a file path in this package."""
         self.zipfile.writestr(destination, content)
 
