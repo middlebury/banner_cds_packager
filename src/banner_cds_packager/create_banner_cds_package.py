@@ -1,4 +1,5 @@
 from .package import DirectoryPackage
+from .package import Package
 import glob
 import typer
 from pathlib import Path
@@ -67,13 +68,13 @@ def run_git_command(command):
     except Exception as e:
         print(e)
 
-def add_sql(instructions, package, changed_files, file_patterns, username):
+def add_sql(instructions: list, package: Package, changed_files: list, file_patterns: list, username: str):
     for file in match_files(changed_files, file_patterns):
         destination_file = rename_sql_if_needed(file)
         package.copy_in_file(file, destination_file)
         instructions.append(f"RUNSQL {username} @{destination_file}")
 
-def match_files(files, patterns):
+def match_files(files: list, patterns: list):
     matches = set()
     for file in files:
         for pattern in patterns:
@@ -82,7 +83,7 @@ def match_files(files, patterns):
                 matches.add(file)
     return matches
 
-def rename_sql_if_needed(file):
+def rename_sql_if_needed(file: Path):
     if file.suffix in ['.sql', '.pks', '.pkb']:
         return file
     return file.with_suffix('.sql')
