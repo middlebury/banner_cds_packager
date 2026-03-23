@@ -1,5 +1,6 @@
 from pathlib import Path
 import shutil
+from zipfile import ZipFile
 
 class Package:
 
@@ -45,3 +46,29 @@ class DirectoryPackage(Package):
         """Delete this package."""
         if self.output_directory.exists():
             shutil.rmtree(self.output_directory)
+
+class ZipPackage(Package):
+
+    def __init__(self, output_file: Path):
+        if output_file.suffix != '.zip':
+            raise ValueError("Output file must have a .zip extension.")
+        self.output_file = output_file
+        self.delete()
+        self.zipfile = ZipFile(output_file, 'w')
+
+    def copy_in_file(self, source: Path, destination: Path) -> None:
+        """Copy a file's content into this package."""
+        self.zipfile.write(source, destination)
+
+    def add_file(self, content: str, destination: Path) -> None:
+        """Add file content to a file path in this package."""
+        self.zipfile.writestr(destination, content)
+
+    def save(self) -> Path:
+        """Write any remaining output and return the resulting path."""
+        return self.output_file
+
+    def delete(self) -> None:
+        """Delete this package."""
+        if self.output_file.exists():
+            self.output_file.unlink()

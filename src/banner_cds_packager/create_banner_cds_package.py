@@ -1,5 +1,7 @@
-from .package import DirectoryPackage
 from .package import Package
+from .package import DirectoryPackage
+from .package import ZipPackage
+from enum import Enum
 import glob
 import typer
 from pathlib import Path
@@ -7,12 +9,16 @@ import re
 import subprocess
 from typing_extensions import Annotated
 
+class OutputMode(str, Enum):
+    zip = "zip"
+    directory = "directory"
 
 def create_banner_cds_package(
     base: Annotated[str, typer.Option(help="The sha ID of the commit after which changes are made")],
     head: Annotated[str, typer.Option(help="The sha ID of the head commit")],
     username: Annotated[str, typer.Option(help="The oracle username to run SQL commands as")],
-    temp_dir: Annotated[Path, typer.Option(exists=True, writable=True, dir_okay=True, file_okay=False, help="Path to the temporary directory")] = Path("/tmp"),
+    output_mode: Annotated[OutputMode, typer.Option()] = OutputMode.zip,
+    output_dir: Annotated[Path, typer.Option(exists=True, writable=True, dir_okay=True, file_okay=False, help="Path to the directory where the output will be written")] = Path("/tmp"),
 
     # Options for identifying changed banner files to add to the package.
 
@@ -35,7 +41,12 @@ def create_banner_cds_package(
     changed_files = run_git_command(['git', 'diff', '--name-only', '--diff-filter=d', f"{base}..{head}"]).splitlines()
     changed_files = list(map(lambda file: Path(file), changed_files))
 
-    package = DirectoryPackage(temp_dir / f"deploy-{base}_{head}")
+    if output_mode == OutputMode.directory:
+        package = DirectoryPackage(output_dir / f"deploy-{base}_{head}")
+    elif output_mode == OutputMode.zip:
+        package = ZipPackage(output_dir / f"deploy-{base}_{head}.zip")
+    else:
+        raise ValueError(f"Unknown --output_mode {output_mode}")
 
     add_sql(instructions, package, changed_files, object_create_pattern, username)
     add_sql(instructions, package, changed_files, object_setup_pattern, username)
