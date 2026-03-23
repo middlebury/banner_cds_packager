@@ -1,8 +1,8 @@
+from .package import DirectoryPackage
 import glob
 import typer
 from pathlib import Path
 import re
-import shutil
 import subprocess
 from typing_extensions import Annotated
 
@@ -30,35 +30,32 @@ def create_banner_cds_package(
     adhoc_sql_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match ad-hoc SQL file patterns. Can be specified multiple times.")] = ["*/adhoc/*.sql"],
 ):
 
-    package_dir = temp_dir / f"deploy-{base}_{head}"
-    print(f"Packaging into {str(package_dir)} ...")
-
+    instructions = []
     changed_files = run_git_command(['git', 'diff', '--name-only', '--diff-filter=d', f"{base}..{head}"]).splitlines()
     changed_files = list(map(lambda file: Path(file), changed_files))
 
-    if package_dir.exists():
-        shutil.rmtree(package_dir)
+    package = DirectoryPackage(temp_dir / f"deploy-{base}_{head}")
 
-    package_dir.mkdir()
-    instructions_path = package_dir / 'inst.txt'
-    instructions_path.touch()
-    instructions = open(instructions_path, "a")
+    add_sql(instructions, package, changed_files, object_create_pattern, username)
+    add_sql(instructions, package, changed_files, object_setup_pattern, username)
+    add_sql(instructions, package, changed_files, object_dml_pattern, username)
+    add_sql(instructions, package, changed_files, function_pattern, username)
+    add_sql(instructions, package, changed_files, view_pattern, username)
+    add_sql(instructions, package, changed_files, matview_pattern, username)
+    add_sql(instructions, package, changed_files, sequence_pattern, username)
+    add_sql(instructions, package, changed_files, package_spec_pattern, username)
+    add_sql(instructions, package, changed_files, package_body_pattern, username)
+    add_sql(instructions, package, changed_files, procedure_pattern, username)
+    add_sql(instructions, package, changed_files, trigger_pattern, username)
+    add_sql(instructions, package, changed_files, adhoc_sql_pattern, username)
 
-    add_sql(instructions, package_dir, changed_files, object_create_pattern, username)
-    add_sql(instructions, package_dir, changed_files, object_setup_pattern, username)
-    add_sql(instructions, package_dir, changed_files, object_dml_pattern, username)
-    add_sql(instructions, package_dir, changed_files, function_pattern, username)
-    add_sql(instructions, package_dir, changed_files, view_pattern, username)
-    add_sql(instructions, package_dir, changed_files, matview_pattern, username)
-    add_sql(instructions, package_dir, changed_files, sequence_pattern, username)
-    add_sql(instructions, package_dir, changed_files, package_spec_pattern, username)
-    add_sql(instructions, package_dir, changed_files, package_body_pattern, username)
-    add_sql(instructions, package_dir, changed_files, procedure_pattern, username)
-    add_sql(instructions, package_dir, changed_files, trigger_pattern, username)
-    add_sql(instructions, package_dir, changed_files, adhoc_sql_pattern, username)
-
-    instructions.close()
-
+    if instructions:
+        package.add_file("\n".join(instructions) + "\n", "inst.txt")
+        result_path = package.save()
+        print(f"Packaged into {str(result_path)}")
+    else:
+        package.delete()
+        print("No changes to package")
 
 def run_git_command(command):
     try:
@@ -70,11 +67,11 @@ def run_git_command(command):
     except Exception as e:
         print(e)
 
-def add_sql(instructions, package_dir, changed_files, file_patterns, username):
+def add_sql(instructions, package, changed_files, file_patterns, username):
     for file in match_files(changed_files, file_patterns):
         destination_file = rename_sql_if_needed(file)
-        copy_file(file, package_dir, destination_file)
-        instructions.write(f"RUNSQL {username} @{destination_file}\n")
+        package.copy_in_file(file, destination_file)
+        instructions.append(f"RUNSQL {username} @{destination_file}")
 
 def match_files(files, patterns):
     matches = set()
@@ -89,8 +86,3 @@ def rename_sql_if_needed(file):
     if file.suffix in ['.sql', '.pks', '.pkb']:
         return file
     return file.with_suffix('.sql')
-
-def copy_file(source_file, package_dir, destination_file):
-    destination_path = package_dir / destination_file
-    destination_path.parent.mkdir(parents=True)
-    shutil.copy(source_file, destination_path)
