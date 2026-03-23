@@ -62,7 +62,7 @@ def create_banner_cds_package(
     add_sql(instructions, package, changed_files, adhoc_sql_pattern, username)
 
     if instructions:
-        package.create_file("\n".join(instructions) + "\n", "inst.txt")
+        package.create_file("\n".join(instructions) + "\n", Path("inst.txt"))
         print(f"Packaged into {str(package.get_path())}")
     else:
         package.delete()
