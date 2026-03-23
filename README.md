@@ -60,7 +60,6 @@ might yield a zip file containing:
 
 # Order of inclusion in `inst.txt`
 
-
 1. `RUNSQL` instructions are ordered first by group, then alphabetically. The
   ordering allows commands to be run after the creation of objects that they may
   depend on. The default globbing patterns are indicated below, but can be
@@ -80,4 +79,4 @@ might yield a zip file containing:
    10. `procedure/*.prc`: Procedure files
    11. `triggers/*.trg`: Database triggers.
    12. `adhoc/*.sql`: Any other database actions.
-2. `PUTCRON`
+2. `PUTCRON` *not yet implemented*
