@@ -28,9 +28,6 @@ def create_banner_cds_package(
     procedure_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match procedure file patterns. Can be specified multiple times.")] = ["*/procedure/*.prc"],
     trigger_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match trigger file patterns. Can be specified multiple times.")] = ["*/trigger/*.trg"],
     adhoc_sql_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match ad-hoc SQL file patterns. Can be specified multiple times.")] = ["*/adhoc/*.sql"],
-
-    # Cron
-    cron_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match cron file patterns. Can be specified multiple times.")] = ["crontab/*.txt"]
 ):
 
     package_dir = temp_dir / f"deploy-{base}_{head}"
