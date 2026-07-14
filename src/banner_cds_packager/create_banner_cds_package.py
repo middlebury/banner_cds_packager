@@ -82,7 +82,7 @@ def add_sql(instructions: list, package: Package, changed_files: list, file_patt
     for file in match_files(changed_files, file_patterns):
         destination_file = rename_sql_if_needed(file)
         package.copy_in_file(file, destination_file)
-        instructions.append(f"RUNSQL {username} @{destination_file}")
+        instructions.append(f"RUNSQL {username} {destination_file}")
 
 def match_files(files: list, patterns: list):
     matches = set()
