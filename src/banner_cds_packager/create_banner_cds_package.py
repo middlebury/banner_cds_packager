@@ -94,6 +94,12 @@ def match_files(files: list, patterns: list):
     return matches
 
 def rename_sql_if_needed(file: Path):
-    if file.suffix in ['.sql', '.pks', '.pkb']:
-        return file
-    return file.with_suffix('.sql')
+    # Ensure there is a .sql suffix.
+    if file.suffix not in ['.sql', '.pks', '.pkb']:
+        file = file.with_suffix('.sql')
+    name = str(file)
+    # Ensure that there are not any sub-directories or other unallowed characters.
+    disallowed = ['/', '-', '[', '@', '!', '#', '$', '%', '^', '&', '*', '(', ')', '<', '>', '?', '\\', '|', '}', '{', '~', ':']
+    for char in disallowed:
+        name = name.replace(char, '_')
+    return Path(name)
