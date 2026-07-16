@@ -8,6 +8,7 @@ authors = [
 ]
 dynamic = ["version"]
 dependencies = [
+  "rich",
   "typer",
   "typing_extensions"
 ]

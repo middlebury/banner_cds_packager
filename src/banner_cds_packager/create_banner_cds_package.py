@@ -6,6 +6,8 @@ import glob
 import typer
 from pathlib import Path
 import re
+from rich import print
+from rich.console import Console
 import subprocess
 from typing_extensions import Annotated
 
@@ -37,7 +39,7 @@ def create(
     trigger_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match trigger file patterns. Can be specified multiple times.")] = ["*/trigger/*.trg"],
     adhoc_sql_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match ad-hoc SQL file patterns. Can be specified multiple times.")] = ["*/adhoc/*.sql"],
 ):
-
+    err_console = Console(stderr=True)
     instructions = []
     changed_files = run_git_command(['git', 'diff', '--name-only', '--diff-filter=d', f"{base}..{head}"]).splitlines()
     changed_files = list(map(lambda file: Path(file), changed_files))
@@ -70,20 +72,19 @@ def create(
 
     if instructions:
         package.create_file("\n".join(instructions) + "\n", Path("inst.txt"))
-        print(f"Packaged into {str(package.get_path())}")
+        err_console.print(f"Packaged into:")
+        # Print the filename to stdout for access by other scripts
+        print(str(package.get_path()))
     else:
         package.delete()
-        print("No changes to package")
+        err_console.print("No changes to package")
 
 def run_git_command(command):
-    try:
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        if process.returncode != 0:
-            raise Exception(f'Git command failed with the following error:\n{stderr.decode()}')
-        return stdout.decode().strip()
-    except Exception as e:
-        print(e)
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+    if process.returncode != 0:
+        raise Exception(f'Git command failed with the following error:\n{stderr.decode()}')
+    return stdout.decode().strip()
 
 def add_sql(instructions: list, package: Package, changed_files: list, file_patterns: list, username: str):
     for file in match_files(changed_files, file_patterns):
