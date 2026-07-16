@@ -13,7 +13,7 @@ class OutputMode(str, Enum):
     zip = "zip"
     directory = "directory"
 
-def create_banner_cds_package(
+def create(
     base: Annotated[str, typer.Option(help="The sha ID of the commit after which changes are made")],
     head: Annotated[str, typer.Option(help="The sha ID of the head commit")],
     username: Annotated[str, typer.Option(help="The oracle username to run SQL commands as")],

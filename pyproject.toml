@@ -13,4 +13,4 @@ dependencies = [
 ]
 
 [project.scripts]
-create_banner_cds_package = "banner_cds_packager.cli:app"
+banner_cds_packager = "banner_cds_packager.cli:app"

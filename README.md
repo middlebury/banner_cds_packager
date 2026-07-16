@@ -40,7 +40,7 @@ Run this program from within a clone of your banner repository and pass it a bas
 
 ```
 cd banner
-banner_cds_packager --sql-user <username> --base 123abc45 --head 82b2a35
+banner_cds_packager create --sql-user <username> --base 123abc45 --head 82b2a35
 ```
 might yield a zip file containing:
 
@@ -57,6 +57,12 @@ might yield a zip file containing:
 * `oracle/student/table/saturn_example.ssbtest.setup.sql`
 * `oracle/student/views/saturn_example.syvtest.vw.sql`
 * `svc_custom.crontab`
+
+## Uploading to the CDS S3 bucket
+
+```
+banner_cds_packager upload --s3-base s3://service-cds-v3-<university> --environment NONPROD --sid PPRD --package-file /tmp/deploy-123abc45_82b2a35.zip
+```
 
 # Order of inclusion in `inst.txt`
 
