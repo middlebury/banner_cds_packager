@@ -19,6 +19,7 @@ def create(
     username: Annotated[str, typer.Option(help="The oracle username to run SQL commands as")],
     output_mode: Annotated[OutputMode, typer.Option()] = OutputMode.zip,
     output_dir: Annotated[Path, typer.Option(exists=True, writable=True, dir_okay=True, file_okay=False, help="Path to the directory where the output will be written")] = Path("/tmp"),
+    output_filename: Annotated[str, typer.Option(help="The filename to use for the result. If not specified, will be 'deploy-<base>_<head>.zip' for zip output and 'deploy-<base>_<head>/' for directory mode.")] = None,
 
     # Options for identifying changed banner files to add to the package.
 
@@ -42,9 +43,15 @@ def create(
     changed_files = list(map(lambda file: Path(file), changed_files))
 
     if output_mode == OutputMode.directory:
-        package = DirectoryPackage(output_dir / f"deploy-{base}_{head}")
+        if output_filename:
+            package = DirectoryPackage(output_dir / output_filename)
+        else:
+            package = DirectoryPackage(output_dir / f"deploy-{base}_{head}")
     elif output_mode == OutputMode.zip:
-        package = ZipPackage(output_dir / f"deploy-{base}_{head}.zip")
+        if output_filename:
+            package = ZipPackage(output_dir / output_filename)
+        else:
+            package = ZipPackage(output_dir / f"deploy-{base}_{head}.zip")
     else:
         raise ValueError(f"Unknown --output_mode {output_mode}")
 
