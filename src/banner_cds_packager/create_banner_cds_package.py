@@ -22,6 +22,8 @@ def create(
     output_mode: Annotated[OutputMode, typer.Option()] = OutputMode.zip,
     output_dir: Annotated[Path, typer.Option(exists=True, writable=True, dir_okay=True, file_okay=False, help="Path to the directory where the output will be written")] = Path("/tmp"),
     output_filename: Annotated[str, typer.Option(help="The filename to use for the result. If not specified, will be 'deploy-<base>_<head>.zip' for zip output and 'deploy-<base>_<head>/' for directory mode.")] = None,
+    test: Annotated[bool, typer.Option(help="Test the diff rather than creating the package.")] = False,
+
 
     # Options for identifying changed banner files to add to the package.
 
@@ -44,7 +46,9 @@ def create(
     changed_files = run_git_command(['git', 'diff', '--name-only', '--diff-filter=d', f"{base}..{head}"]).splitlines()
     changed_files = list(map(lambda file: Path(file), changed_files))
 
-    if output_mode == OutputMode.directory:
+    if test:
+        package = Package()
+    elif output_mode == OutputMode.directory:
         if output_filename:
             package = DirectoryPackage(output_dir / output_filename)
         else:
@@ -57,6 +61,7 @@ def create(
     else:
         raise ValueError(f"Unknown --output_mode {output_mode}")
 
+    # Add SQL to deployed package.
     add_sql(instructions, package, changed_files, object_create_pattern, username)
     add_sql(instructions, package, changed_files, object_setup_pattern, username)
     add_sql(instructions, package, changed_files, object_dml_pattern, username)
@@ -70,14 +75,32 @@ def create(
     add_sql(instructions, package, changed_files, trigger_pattern, username)
     add_sql(instructions, package, changed_files, adhoc_sql_pattern, username)
 
+    # Ignore changes to documentation files.
+    for file in match_files(changed_files, ["*.md", "*.txt"]):
+        changed_files.remove(file)
+    # Ignore changes to SSB9 json files.
+    for file in match_files(changed_files, ["SSB9/*/*.json"]):
+        changed_files.remove(file)
+    # Ignore pipelines and metadata files.
+    for file in match_files(changed_files, ["azure/*", "**/.gitignore"]):
+        changed_files.remove(file)
+
     if instructions:
-        package.create_file("\n".join(instructions) + "\n", Path("inst.txt"))
-        err_console.print(f"Packaged into:")
-        # Print the filename to stdout for access by other scripts
-        print(str(package.get_path()))
+        if test:
+            err_console.print(f"Instructions:\n\t" + "\n\t".join(instructions) + "\n")
+        else:
+            package.create_file("\n".join(instructions) + "\n", Path("inst.txt"))
+            err_console.print(f"Packaged into:")
+            # Print the filename to stdout for access by other scripts
+            print(str(package.get_path()))
     else:
         package.delete()
         err_console.print("No changes to package")
+
+    if len(changed_files):
+        err_console.print(f"Files unaccounted for and not included in the package:\n\t" + "\n\t".join([str(file) for file in changed_files]))
+        if test:
+            exit(1)
 
 def run_git_command(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -91,6 +114,8 @@ def add_sql(instructions: list, package: Package, changed_files: list, file_patt
         destination_file = rename_sql_if_needed(file)
         package.copy_in_file(file, destination_file)
         instructions.append(f"RUNSQL {username} {destination_file}")
+        # Remove the file from the list now that it is handled.
+        changed_files.remove(file)
 
 def match_files(files: list, patterns: list):
     matches = set()
