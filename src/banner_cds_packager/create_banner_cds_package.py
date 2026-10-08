@@ -32,7 +32,7 @@ def create(
     object_setup_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match table and object setup file patterns. Can be specified multiple times.")] = ["*/table/*.setup.sql", "*/object/*.setup.sql"],
     object_dml_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match table and object DML file patterns. Can be specified multiple times.")] = ["*/table/*.dml.sql", "*/object/*.dml.sql"],
     function_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match file patterns. Can be specified multiple times.")] = ["*/function/*.fnc"],
-    view_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match view file patterns. Can be specified multiple times.")] = ["*/views/*.vw"],
+    view_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match view file patterns. Can be specified multiple times.")] = ["*/view/*.vw"],
     matview_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match materialized view file patterns. Can be specified multiple times.")] = ["*/matview/*.mv", "*/matview/*.sql", "*/matview/*.vw"],
     sequence_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match sequence file patterns. Can be specified multiple times.")] = ["*/sequence/*.sql"],
     package_spec_pattern: Annotated[list[str], typer.Option(help="A glob pattern that will match package specification file patterns. Can be specified multiple times.")] = ["*/package/*.pks"],

@@ -49,13 +49,13 @@ might yield a zip file containing:
     RUNSQL <username> @oracle/student/table/saturn_example.ssbtest.create.sql
     RUNSQL <username> @oracle/student/table/saturn_example.stvtest.create.sql
     RUNSQL <username> @oracle/student/table/saturn_example.ssbtest.setup.sql
-    RUNSQL <username> @oracle/student/views/saturn_example.syvtest.vw.sql
+    RUNSQL <username> @oracle/student/view/saturn_example.syvtest.vw.sql
     PUTCRON svc_custom.crontab
     ```
 * `oracle/student/table/saturn_example.ssbtest.create.sql`
 * `oracle/student/table/saturn_example.stvtest.create.sql`
 * `oracle/student/table/saturn_example.ssbtest.setup.sql`
-* `oracle/student/views/saturn_example.syvtest.vw.sql`
+* `oracle/student/view/saturn_example.syvtest.vw.sql`
 * `svc_custom.crontab`
 
 ## Uploading to the CDS S3 bucket
@@ -77,7 +77,7 @@ banner_cds_packager upload --s3-base s3://service-cds-v3-<university> --environm
    3. `table/*.dml.sql`, `object/*.dml.sql`: Initializing new tables with any
     seed data, or any DML in general.
    4. `function/*.fnc` Function definitions
-   5. `views/*.vw`: Database view scripts.
+   5. `view/*.vw`: Database view scripts.
    6. `matview/*.mv`: Materialized view definitions.
    7. `sequence/*.sql`: Sequences.
    8. `package/*.pks`: Package specifications.
